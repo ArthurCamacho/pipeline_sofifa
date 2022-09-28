@@ -4,20 +4,17 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import urllib.request
+import funcoes
 
-
-# #Inicia o navegador
-# nvg = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-# #Navega para o site principal
-# nvg.get('https://pt.uefa.com/uefachampionsleague/clubs/')
-''
-# nvg.find_element(By.CSS_SELECTOR, 'body > div.container-fluid.main-wrap > div > div > div.content > div.pk-container.teams-overview.lazyloaded > div > div > div > div:nth-child(2) > fieldset > div', ).
-
+#Faz a requisição pra obter o fonte da pagina com os times da champions
 pTimes = urllib.request.urlopen('https://pt.uefa.com/uefachampionsleague/clubs/')
 
+#Encontra a lista de times dentro na pagina e converte a lista com os elementos html (elementos) para texto (times)
 pTimes_soup = BeautifulSoup(pTimes, 'html5lib')
-teste = pTimes_soup.find('div', attrs={'class' : 'teams-overview_group'}).find_all('span', attrs={'slot' : 'primary'})
-for i in teste:
-    print(i.text)
+elementos = pTimes_soup.find('div', attrs={'class' : 'teams-overview_group'}).find_all('span', attrs={'slot' : 'primary'})
+times = funcoes.converte_lista_elementos_para_texto(elementos)
+
+#Descobrir quais requisições usar para buscar os times e jogadores dentro da pagina do sofifa
+#Pensar em uma forma eficiente de filtrar os times ou alterar o escopo do projeto
 exit()
 
