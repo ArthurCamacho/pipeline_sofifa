@@ -28,11 +28,15 @@ cod_times = {
 #lista de times que jogaram o campeonato
 times = ['BARCELONA', 'PSG']
 
-def requisicao_soup(analisador_soup, agente_usuario, url_requisicao):
-    """analisador_soup - string - qual será o parser do retorno da requisição //
+def requisicao_soup(agente_usuario, url_requisicao, analisador_soup = None):
+    """url_requisicao - string - url que sera executada na requisição //
        agente_usuario - string - agente que executará a requisição para evitar o bloqueio do robo //
-       utl_requisicao - string - url que sera executada na requisição"""
-    requisicao = Request(url_requisicao, )
+       analisador_soup - string - qual será o parser do retorno da requisição """
+    requisicao = Request(url_requisicao, headers={"User-Agent": agente_usuario})
+    pagina = urlopen(requisicao)
+    pagina_soup = BeautifulSoup(pagina, analisador_soup)
+    return pagina_soup
+
 
 for time in times:
     #Executar requisição para verificar o retorno
@@ -40,9 +44,20 @@ for time in times:
 
     #https://www.pythonpool.com/urllib-error-httperror-http-error-403-forbidden/#:~:text=Trending%20Now-,What%20is%20a%20403%20error%3F,user%20or%20the%20server%20end.
     #Solução imlpementada retirada do link acima
-
-    # fonte_jogadores = request.urlopen(url)
-    # fonte_jogadores_soup = BeautifulSoup(fonte_jogadores, 'html5lib')
-
     
-    print()
+    #Requisição bem sucedida (Visualmente não funciona tao bem, mas o código é obtido com sucesso)
+    pJogadores = requisicao_soup('Mozilla/5.0', f'https://sofifa.com/players?type=all&tm%5B%5D={cod_times[time]}', 'html5lib')
+
+    #Buscar a url de todos os jogadores do time listado
+    jogadores = pJogadores.find('table', attrs={'class' : 'table table-hover persist-area'}).find('tbody').find_all('a', attrs={'role' : 'tooltip'})
+
+    #Após buscar o url de todos os jogadores, deve fazer as requisições de todos eles e salvar os dados necessário para acrescentar em um json
+    for jogador in jogadores:
+        url_jogador = 'https://sofifa.com' + jogador.attrs['href'] 
+        dados_jogador = requisicao_soup('Mozilla/5.0', url_jogador, 'html5lib')
+        nome = dados_jogador.find('div', attrs={'class' : 'grid'}).find('div', attrs={'class' : 'info'}).find('h1').text
+        # O elemento da idade esta dentro da div, sem uma tag para separar
+        # É necessário tratar o dado obtido para extrair da string completa somente a idade ou data de nascimento
+        idade = dados_jogador.find('div', attrs={'class' : 'grid'}).find('div', attrs={'class' : 'info'}).find('div', attrs={'class' : 'meta ellipsis'}).text
+
+        print()
