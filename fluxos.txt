@@ -1,1 +1,0 @@
-1 - Mapear um dicionario com: CHAVE (Nome do time) VALOR (Codigo do time para requisição)
